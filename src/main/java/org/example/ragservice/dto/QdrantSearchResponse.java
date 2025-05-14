@@ -1,8 +1,11 @@
 package org.example.ragservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class QdrantSearchResponse {
+    @JsonProperty("result")
     private List<SearchResultItem> points;
 
     // Getters and setters

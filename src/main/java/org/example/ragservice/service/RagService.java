@@ -26,15 +26,15 @@ public class RagService {
         try {
             TextInput input = new TextInput();
             input.setText(userQuery);
+            System.out.println("sosal_pipku");
             EmbeddingResponse embedding = embeddingClient.getQueryEmbedding(input);
-
+            System.out.println(embedding.getEmbedding());
             Map<String, Object> searchRequest = new HashMap<>();
-            searchRequest.put("vector", embedding.getEmbedding());
             searchRequest.put("limit", 3);
-
-            QdrantSearchResponse response = qdrantClient.searchPoints("knowledge_point", searchRequest);
+            searchRequest.put("vector", embedding.getEmbedding());
+            searchRequest.put("with_payload", true);  // Добавлено
+            QdrantSearchResponse response = qdrantClient.searchPoints("context_embeddings", searchRequest);
             List<SearchResultItem> results = Optional.ofNullable(response.getPoints()).orElse(Collections.emptyList());
-
             StringBuilder context = new StringBuilder();
             for (SearchResultItem result : results) {
                 Map<String, Object> payload = result.getPayload();
@@ -42,11 +42,9 @@ public class RagService {
                     context.append(payload.get("text")).append("\n");
                 }
             }
-
             return context.toString();
-
         } catch (FeignException.NotFound e) {
-            throw new RuntimeException("Коллекция knowledge_points не найдена в Qdrant", e);
+            throw new RuntimeException("Коллекция context_embeddings не найдена в Qdrant", e);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска в Qdrant: " + e.getMessage(), e);
         }
